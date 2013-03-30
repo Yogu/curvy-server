@@ -1,0 +1,24 @@
+{
+  "name": "curvy-server",
+  "version": "0.1.0",
+  "author": "Yogu",
+  "contributors":[
+    {
+      "name": "Yogu"
+    }
+  ],
+  "scripts": {
+    "start" : "node app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yogu/curvy-server.git"
+  },
+  "dependencies": {
+    "websocket": "x"
+  },
+  "engines": {
+    "node": ">=0.8.x",
+    "npm": ">=1.1.x"
+  }
+}
