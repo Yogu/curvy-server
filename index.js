@@ -1,4 +1,5 @@
 var server = require('./server.js');
 var controller = require('./controller.js');
+var port = process.env.PORT || 8888;
 
-server.start(8888, controller);
+server.start(port, controller);
