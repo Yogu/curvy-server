@@ -22,8 +22,8 @@ function accept(socket) {
 		
 		contact = addContact(user);
 		if (!contact) {
-			client.emit('name_not_available');
-			client.disconnect();
+			socket.emit('name_not_available');
+			socket.disconnect();
 			return;
 		}
 		

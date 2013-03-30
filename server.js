@@ -14,6 +14,7 @@ function start(port,controller) {
 	io.configure(function () { 
 	  io.set("transports", ["xhr-polling"]); 
 	  io.set("polling duration", 10); 
+	  io.set("origin", "*:*");
 	});
 	
 	server.listen(port);
