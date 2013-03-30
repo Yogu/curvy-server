@@ -3,6 +3,11 @@ var url = require("url");
 var io = require('socket.io');
 var EventEmitter = require('events').EventEmitter;
 
+io.configure(function () { 
+  io.set("transports", ["xhr-polling"]); 
+  io.set("polling duration", 10); 
+});
+
 function start(port,controller) {
 	var server = http.createServer(function(request, response) {
 		console.log("Request received for " + request.url);
