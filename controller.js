@@ -36,7 +36,7 @@ function accept(socket) {
 		isLoggedIn = true;
 	});
 	
-	var events = ['call', 'accept', 'reject', 'candidate', 'close', 'data'];
+	var events = ['call', 'accept', 'reject', 'candidate', 'close', 'data', 'volatile'];
 	
 	for (var i = 0; i < events.length; i++) {
 		(function(type) {
@@ -51,7 +51,10 @@ function accept(socket) {
 					var recipientSocket = recipient.socket;
 					console.log(type + ' from ' + user + ' to ' + data.contact);
 					data.contact = user; // was recipient, becomes sender in the answer
-					recipientSocket.emit(type, data);
+					if (type == 'volatlie')
+						recipientSocket.volatile.emit(type, data);
+					else
+						recipientSocket.emit(type, data);
 				} else
 					console.log('invalid message: contact parameter missing (from ' + user + ')');
 			});
