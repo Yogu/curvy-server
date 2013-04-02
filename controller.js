@@ -1,9 +1,9 @@
-var contacts = {};
+var players = {};
 var sockets = [];
 
 function accept(socket) {
 	var isLoggedIn = false;
-	var contact = null;
+	var player = null;
 	var user = null;
 	
 	socket.on('login', function(data) {
@@ -20,23 +20,23 @@ function accept(socket) {
 			return;
 		}
 		
-		contact = addContact(user);
-		if (!contact) {
+		player = addPlayer(user);
+		if (!player) {
 			socket.emit('name_not_available');
 			socket.disconnect();
 			return;
 		}
 		
 		socket.emit('accepted');
-		socket.contact = contact;
-		contact.socket = socket;
+		socket.player = player;
+		player.socket = socket;
 		sockets.push(socket);
-		sendContacts(socket);
-		console.log(contact.name + ' logged in');
+		sendPlayers(socket);
+		console.log(player.name + ' logged in');
 		isLoggedIn = true;
 	});
 	
-	var events = ['call', 'accept', 'reject', 'candidate', 'close', 'data', 'volatile'];
+	var events = ['call', 'hangup', 'reject', 'connection', 'data', 'volatile'];
 	
 	for (var i = 0; i < events.length; i++) {
 		(function(type) {
@@ -45,18 +45,57 @@ function accept(socket) {
 					socket.emit('err', {message: 'log in first'});
 					return;
 				}
+
+				var recipientPlayer = null;
+				if (data && data.recipient) {
+					var recipient = data.recipient.trim();
+					recipientPlayer = (recipient in players) ? players[data.recipient] : null;
+				}
 				
-				if (data.contact && data.contact in contacts) {
-					var recipient = contacts[data.contact];
-					var recipientSocket = recipient.socket;
-					console.log(type + ' from ' + user + ' to ' + data.contact);
-					data.contact = user; // was recipient, becomes sender in the answer
-					if (type == 'volatlie')
-						recipientSocket.volatile.emit(type, data);
-					else
-						recipientSocket.emit(type, data);
-				} else
-					console.log('invalid message: contact parameter missing (from ' + user + ')');
+				switch (type) {
+				case 'hangup':
+					console.log('hangup from ' + user);
+					hangupMaybe(player);
+					setPlayerState(player, 'idle');
+					break;
+				
+				case 'call':
+				case 'connection':
+				case 'data':
+				case 'volatile':
+				case 'reject':
+					if (recipientPlayer) {
+						if (type == 'call') {
+							// if both players are calling each other, establish the call
+							if (recipientPlayer.peer == player) {
+								setPlayerState(player, 'busy', recipientPlayer);
+								setPlayerState(recipientPlayer, 'busy', player);
+								type = 'accept';
+								// confirm accept
+								player.socket.emit('accept', {sender: recipientPlayer.name});
+							} else {
+								// otherwise, hang up a call if existing and call the recipient
+								hangupMaybe(player);
+								setPlayerState(player, 'calling', recipientPlayer);
+							}
+						} else if (type == 'reject') {
+							if (recipientPlayer.state == 'calling' && recipientPlayer.peer == player) {
+								setPlayerState(recipientPlayer, 'idle');
+							} else
+								break; // do not transmit invalid reject messages
+						}
+						
+						console.log(type + ' from ' + user + ' to ' + recipientPlayer.name);
+						data.sender = user;
+						if (type == 'volatlie')
+							recipientPlayer.socket.volatile.emit(type, data);
+						else
+							recipientPlayer.socket.emit(type, data);
+					} else
+						socket.emit('err', {message:
+							'invalid message: recipient parameter missing (from ' + user + ')'});
+					break;
+				}
 			});
 		})(events[i]);
 	}
@@ -69,38 +108,64 @@ function accept(socket) {
 		var index = sockets.indexOf(socket);
 		if (index >= 0)
 			sockets.slice(index, 1);
-		if (contact != null) {
-			removeContact(contact);
-			console.log(contact.name + ' logged out');
+		if (player != null) {
+			removePlayer(player);
+			console.log(player.name + ' logged out');
 		}	
 	});
 };
 
-function sendContacts(socket) {
-	socket.emit('contacts', Object.keys(contacts));
+function sendPlayers(socket) {
+	var playerArr = [];
+	for (var name in players) {
+		var player = players[name];
+		playerArr.push({
+			name: player.name, 				
+			state: player.state, 
+			peer: (player.peer ? player.peer.name : null)
+		});
+	}
+	socket.emit('players', playerArr);
 }
 
-function sendContactsToAllSockets() {
+function sendPlayersToAllSockets() {
 	for (var i = 0; i < sockets.length; i++) {
-		sendContacts(sockets[i]);
+		sendPlayers(sockets[i]);
 	}
 }
 
-function addContact(name) {
-	if (name in contacts)
+function addPlayer(name) {
+	if (name in players)
 		return false;
 	else {
-		var contact = {name: name};
-		contacts[name] = contact;
-		sendContactsToAllSockets();
-		return contact;
+		var player = {name: name, state: 'idle', peer: null};
+		players[name] = player;
+		sendPlayersToAllSockets();
+		return player;
 	}
 }
 
-function removeContact(contact) {
-	if (contact.name in contacts) {
-		delete contacts[contact.name];
-		sendContactsToAllSockets();
+function removePlayer(player) {
+	if (player.name in players) {
+		hangupMaybe(player);
+		delete players[player.name];
+		sendPlayersToAllSockets();
+	}
+}
+
+function setPlayerState(player, state, peer) {
+	if (player.state != state || player.peer || peer) {
+		player.state = state;
+		player.peer = peer || null;
+		sendPlayersToAllSockets();
+	}
+}
+
+function hangupMaybe(player) {
+	if (player.state == 'busy' && player.peer) {
+		console.log('hanging up ' + player.peer.name);
+		player.peer.socket.emit('hangup');
+		setPlayerState(player.peer, 'idle');
 	}
 }
 
