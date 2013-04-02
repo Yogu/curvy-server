@@ -60,6 +60,10 @@ function accept(socket) {
 			});
 		})(events[i]);
 	}
+	
+	socket.on('ping', function() {
+		socket.emit('ping');
+	});
 
 	socket.on('disconnect', function() {
 		var index = sockets.indexOf(socket);
