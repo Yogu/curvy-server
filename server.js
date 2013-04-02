@@ -11,12 +11,14 @@ function start(port,controller) {
 	})
 	io = io.listen(server);
 
-	io.configure(function () { 
-	  io.set("transports", ["xhr-polling"]); 
-	  io.set("polling duration", 10); 
-	  io.set("origin", "*:*");
-	  io.set('heartbeat timeout', 30);
-	  io.set('heartbeat interval', 15);
+	io.configure(function () {
+		// do a heroku:add HEROKU=true when intializing heroku
+		if ('HEROKU' in os.environ'))
+			io.set("transports", ["xhr-polling"]); 
+		io.set("polling duration", 10); 
+		io.set("origin", "*:*");
+		io.set('heartbeat timeout', 30);
+		io.set('heartbeat interval', 15);
 	});
 	
 	server.listen(port);
