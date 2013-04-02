@@ -8,14 +8,14 @@ function accept(socket) {
 	
 	socket.on('login', function(data) {
 		if (isLoggedIn) {
-			socket.emit('error', {message: 'already logged in'});
+			socket.emit('err', {message: 'already logged in'});
 			socket.disconnect();
 			return;
 		}
 		
 		user = (data.user || "").trim();
 		if (!user) {
-			socket.emit('error', {message: 'specify user name'});
+			socket.emit('err', {message: 'specify user name'});
 			socket.disconnect();
 			return;
 		}
@@ -42,7 +42,7 @@ function accept(socket) {
 		(function(type) {
 			socket.on(type, function(data) {
 				if (!isLoggedIn) {
-					socket.emit('error', {message: 'log in first'});
+					socket.emit('err', {message: 'log in first'});
 					return;
 				}
 				

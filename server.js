@@ -15,6 +15,8 @@ function start(port,controller) {
 	  io.set("transports", ["xhr-polling"]); 
 	  io.set("polling duration", 10); 
 	  io.set("origin", "*:*");
+	  io.set('heartbeat timeout', 30);
+	  io.set('heartbeat interval', 15);
 	});
 	
 	server.listen(port);
