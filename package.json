@@ -13,5 +13,9 @@
   "engines": {
     "node": ">=0.6",
     "npm": ">=1.1"
-  }
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "subdomain": "curvy"
 }
