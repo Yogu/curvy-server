@@ -1,6 +1,6 @@
 {
   "name": "curvy-server",
-  "version": "0.1.0",
+  "version": "0.1.0-1",
   "description": "Game server for curvy browser game",
   "author": "Jan Melcher <info@yogularm.de>",
   "keywords": [
