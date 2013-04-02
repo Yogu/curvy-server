@@ -13,7 +13,7 @@ function start(port,controller) {
 
 	io.configure(function () {
 		// do a heroku:add HEROKU=true when intializing heroku
-		if ('HEROKU' in os.environ'))
+		if (global.os && global.os.environ && 'HEROKU' in os.environ)
 			io.set("transports", ["xhr-polling"]); 
 		io.set("polling duration", 10); 
 		io.set("origin", "*:*");
