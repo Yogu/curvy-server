@@ -101,8 +101,8 @@ function accept(socket) {
 		})(events[i]);
 	}
 	
-	socket.on('ping', function() {
-		socket.emit('ping');
+	socket.on('ping', function(data) {
+		socket.emit('pingback', data);
 	});
 
 	socket.on('disconnect', function() {
