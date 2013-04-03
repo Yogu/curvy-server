@@ -19,6 +19,7 @@ function start(port,controller) {
 		io.set("origin", "*:*");
 		io.set('heartbeat timeout', 30);
 		io.set('heartbeat interval', 15);
+		io.set('log level', 2 /* info */)
 	});
 	
 	server.listen(port);

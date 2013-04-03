@@ -41,7 +41,6 @@ function accept(socket) {
 	for (var i = 0; i < events.length; i++) {
 		(function(type) {
 			socket.on(type, function(data) {
-				console.log(type + ' from ' + user);
 				var sendType = type;
 				
 				if (!isLoggedIn) {
@@ -89,10 +88,12 @@ function accept(socket) {
 								break; // do not transmit invalid reject messages
 						}
 						
-						console.log(type + ' from ' + user + ' to ' + recipientPlayer.name);
+						// volatile messages are sent 10 times a frame - per player
+						if (type != 'volatile')
+							console.log(type + ' from ' + user + ' to ' + recipientPlayer.name);
 						data.sender = user;
-						if (sendType == 'volatlie')
-							recipientPlayer.socket.volatile.emit(sendType, data);
+						if (sendType == 'volatile')
+							recipientPlayer.socket.volatile.emit('data', data);
 						else
 							recipientPlayer.socket.emit(sendType, data);
 					} else
