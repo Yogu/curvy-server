@@ -71,8 +71,9 @@ function accept(socket) {
 								setPlayerState(player, 'busy', recipientPlayer);
 								setPlayerState(recipientPlayer, 'busy', player);
 								type = 'accept';
+								data.isCaller = true;
 								// confirm accept
-								player.socket.emit('accept', {sender: recipientPlayer.name});
+								player.socket.emit('accept', {sender: recipientPlayer.name, isCaller: false});
 							} else {
 								// otherwise, hang up a call if existing and call the recipient
 								hangupMaybe(player);
@@ -93,7 +94,7 @@ function accept(socket) {
 							recipientPlayer.socket.emit(type, data);
 					} else
 						socket.emit('err', {message:
-							'invalid message: recipient parameter missing (from ' + user + ')'});
+							'invalid ' + type + ' message: recipient parameter missing (from ' + user + ')'});
 					break;
 				}
 			});
