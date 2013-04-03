@@ -41,6 +41,9 @@ function accept(socket) {
 	for (var i = 0; i < events.length; i++) {
 		(function(type) {
 			socket.on(type, function(data) {
+				console.log(type + ' from ' + user);
+				var sendType = type;
+				
 				if (!isLoggedIn) {
 					socket.emit('err', {message: 'log in first'});
 					return;
@@ -70,7 +73,7 @@ function accept(socket) {
 							if (recipientPlayer.peer == player) {
 								setPlayerState(player, 'busy', recipientPlayer);
 								setPlayerState(recipientPlayer, 'busy', player);
-								type = 'accept';
+								sendType = 'accept';
 								data.isCaller = true;
 								// confirm accept
 								player.socket.emit('accept', {sender: recipientPlayer.name, isCaller: false});
@@ -88,10 +91,10 @@ function accept(socket) {
 						
 						console.log(type + ' from ' + user + ' to ' + recipientPlayer.name);
 						data.sender = user;
-						if (type == 'volatlie')
-							recipientPlayer.socket.volatile.emit(type, data);
+						if (sendType == 'volatlie')
+							recipientPlayer.socket.volatile.emit(sendType, data);
 						else
-							recipientPlayer.socket.emit(type, data);
+							recipientPlayer.socket.emit(sendType, data);
 					} else
 						socket.emit('err', {message:
 							'invalid ' + type + ' message: recipient parameter missing (from ' + user + ')'});
