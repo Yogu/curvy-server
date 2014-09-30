@@ -1,6 +1,6 @@
 curvy-server
 ============
 
-Node.js server for curvy browser game
+Node.js server for the [curvy browser game](https://github.com/Yogu/curvy/)
 
-Client: http://yogu.github.com/curvy
+Play it: https://yogu.github.io/curvy
