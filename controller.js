@@ -36,7 +36,7 @@ function accept(socket) {
 		isLoggedIn = true;
 	});
 	
-	var events = ['call', 'hangup', 'reject', 'connection', 'data', 'volatile'];
+	var events = ['call', 'hangup', 'reject', 'connection', 'data', 'volatile', 'chat'];
 	
 	for (var i = 0; i < events.length; i++) {
 		(function(type) {
@@ -59,6 +59,14 @@ function accept(socket) {
 					console.log('hangup from ' + user);
 					hangupMaybe(player);
 					setPlayerState(player, 'idle');
+					break;
+					
+				case 'chat':
+					if (!data || (typeof data.message != 'string') || !data.message.trim())
+						break;
+					var message = data.message.trim();
+					console.log('CHAT: ' + user + ': ' + message);
+					socket.broadcast.emit('chat', { message: message, sender: user });
 					break;
 				
 				case 'call':
